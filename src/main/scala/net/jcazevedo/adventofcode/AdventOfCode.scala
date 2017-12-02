@@ -7,8 +7,14 @@ trait AdventOfCode {
   def loadFile(day: Int): List[String] =
     io.Source.fromFile(f"$day%02d.input").getLines.toList
 
-  def aStar[T](from: T, to: T, heuristic: T => Double, neighbors: T => List[(Double, T)]): Option[List[T]] = {
-    val pq = mutable.PriorityQueue[(Double, List[T])]()(Ordering.by[(Double, List[T]), Double](_._1).reverse)
+  def aStar[T](
+    from:      T,
+    to:        T,
+    heuristic: T => Double,
+    neighbors: T => List[(Double, T)]): Option[List[T]] = {
+    implicit val ord: Ordering[(Double, List[T])] =
+      Ordering.by[(Double, List[T]), Double](_._1).reverse
+    val pq = mutable.PriorityQueue[(Double, List[T])]()
     val cost = mutable.Map[T, Double]()
     cost(from) = 0.0
     pq.enqueue((heuristic(from), List(from)))
