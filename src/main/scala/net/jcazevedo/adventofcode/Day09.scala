@@ -1,15 +1,14 @@
 package net.jcazevedo.adventofcode
 
-object Day09 extends App with AdventOfCode {
-  val lines = loadFile(9)
-
-  def run(groups: String): (Int, Int) = {
+class Day09 extends DailyChallenge[Int, Int] {
+  def run(filename: String): (Int, Int) = {
+    val lines = io.Source.fromFile(filename).getLines.toList
     var totalScore = 0
     var nonCancellable = 0
     var inGroup = 0
     var garbage = false
     var ignore = false
-    groups.foreach { ch =>
+    lines.head.foreach { ch =>
       if (!ignore) {
         if (ch == '!') {
           ignore = true
@@ -33,6 +32,4 @@ object Day09 extends App with AdventOfCode {
     }
     (totalScore, nonCancellable)
   }
-
-  println(run(lines.head))
 }
