@@ -131,21 +131,8 @@ case class JGZ(x: String, y: String) extends Instruction {
   }
 }
 
-object Day18 extends App with AdventOfCode {
-  val instructions = loadFile(18).map { line =>
-    val ss = line.split(" ")
-    ss(0) match {
-      case "snd" => SND(ss(1))
-      case "set" => SET(ss(1), ss(2))
-      case "add" => ADD(ss(1), ss(2))
-      case "mul" => MUL(ss(1), ss(2))
-      case "mod" => MOD(ss(1), ss(2))
-      case "rcv" => RCV(ss(1))
-      case "jgz" => JGZ(ss(1), ss(2))
-    }
-  }.toIndexedSeq
-
-  def run(prog: Program1, instructions: IndexedSeq[Instruction]): Option[Option[Long]] = {
+class Day18 extends DailyChallenge[Long, Long] {
+  private def run(prog: Program1, instructions: IndexedSeq[Instruction]): Option[Option[Long]] = {
     if (prog.pc < 0 || prog.pc >= instructions.length)
       None
     else {
@@ -158,7 +145,7 @@ object Day18 extends App with AdventOfCode {
     }
   }
 
-  def run(prog: Program2, instructions: IndexedSeq[Instruction], nSends: Long = 0): Long = {
+  private def run(prog: Program2, instructions: IndexedSeq[Instruction], nSends: Long = 0): Long = {
     if (prog.isDeadlock(instructions))
       nSends
     else if (prog.currentProg.waiting(instructions))
@@ -170,6 +157,24 @@ object Day18 extends App with AdventOfCode {
     }
   }
 
-  println(run(Program1(), instructions))
-  println(run(Program2(programs = Vector(InnerProgram2(Registers(Map("p" -> 0))), InnerProgram2(Registers(Map("p" -> 1))))), instructions))
+  def run(filename: String): (Long, Long) = {
+    val lines = io.Source.fromFile(filename).getLines().toList
+    val instructions = lines.map { line =>
+      val ss = line.split(" ")
+      ss(0) match {
+        case "snd" => SND(ss(1))
+        case "set" => SET(ss(1), ss(2))
+        case "add" => ADD(ss(1), ss(2))
+        case "mul" => MUL(ss(1), ss(2))
+        case "mod" => MOD(ss(1), ss(2))
+        case "rcv" => RCV(ss(1))
+        case "jgz" => JGZ(ss(1), ss(2))
+      }
+    }.toIndexedSeq
+
+    val res1 = run(Program1(), instructions).get.get
+    val res2 = run(Program2(programs = Vector(InnerProgram2(Registers(Map("p" -> 0))), InnerProgram2(Registers(Map("p" -> 1))))), instructions)
+
+    (res1, res2)
+  }
 }
