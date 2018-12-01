@@ -2,7 +2,7 @@ package net.jcazevedo.adventofcode
 
 import scala.collection.mutable
 
-object Day21 extends App with AdventOfCode {
+class Day21 extends DailyChallenge[Int, Int] {
   def flip(p: Vector[String]): Vector[String] = {
     val L = p.length
     val res = (0 until L).map(_ => "." * L).toVector
@@ -69,31 +69,36 @@ object Day21 extends App with AdventOfCode {
     }
   }
 
-  val patterns = loadFile(21).map { l =>
-    val Array(is, os) = l.split(" => ")
-    Pattern(is.split("/").toVector, os.split("/").toVector)
-  }
+  def run(filename: String): (Int, Int) = {
+    val lines = io.Source.fromFile(filename).getLines().toList
 
-  val start = Vector(".#.", "..#", "###")
-
-  val cache = mutable.Map[Vector[String], Vector[String]]()
-  def getOutput(square: Vector[String]): Vector[String] = {
-    cache.getOrElseUpdate(square, patterns.find(_.doesMatch(square)) match {
-      case Some(p) => p.output
-      case None =>
-        println(s"No pattern found that matches $square")
-        return Vector.empty
-    })
-  }
-
-  def run(grid: Vector[String], iterations: Int): Vector[String] =
-    iterations match {
-      case 0 => grid
-      case n => run(join(split(grid).map(_.map(getOutput))), n - 1)
+    val patterns = lines.map { l =>
+      val Array(is, os) = l.split(" => ")
+      Pattern(is.split("/").toVector, os.split("/").toVector)
     }
 
-  val res1 = run(start, 5)
-  println(res1.map(_.count(_ == '#')).sum)
-  val res2 = run(start, 18)
-  println(res2.map(_.count(_ == '#')).sum)
+    val start = Vector(".#.", "..#", "###")
+
+    val cache = mutable.Map[Vector[String], Vector[String]]()
+
+    def getOutput(square: Vector[String]): Vector[String] = {
+      cache.getOrElseUpdate(square, patterns.find(_.doesMatch(square)) match {
+        case Some(p) => p.output
+        case None =>
+          println(s"No pattern found that matches $square")
+          return Vector.empty
+      })
+    }
+
+    def run(grid: Vector[String], iterations: Int): Vector[String] =
+      iterations match {
+        case 0 => grid
+        case n => run(join(split(grid).map(_.map(getOutput))), n - 1)
+      }
+
+    val res1 = run(start, 5).map(_.count(_ == '#')).sum
+    val res2 = run(start, 18).map(_.count(_ == '#')).sum
+
+    (res1, res2)
+  }
 }
